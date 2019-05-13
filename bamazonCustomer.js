@@ -22,7 +22,7 @@ function displayInventory(){
     connection.query("SELECT * FROM products", function(err, res){
         if(err) throw err;
 
-        console.log("_.~"~._.~"~._.~Welcome to Bamazon~._.~"~._.~"~._");
+        console.log("_.~._~._.~.~._.~Welcome to Bamazon~._.~._~._.~._~._");
         console.log("\n--------------------------------------------------------------------------------------------------\n");
 
         //loop through items and display table
@@ -35,4 +35,18 @@ function displayInventory(){
     });
 
 };
+
+displayInventory();
+
+// validate user input make sure user is supplying only positive integers 
+function validateInput(value) {
+    var interger = Number.isInteger(parseFloat(value));
+    var sign = Math.sign(value);
+
+    if(integer && (sign === 1)) {
+        return true;
+    }else {
+        return "Please enter a whole non-zero number.";
+    }
+}
 
