@@ -36,7 +36,6 @@ function displayInventory(){
 
 };
 
-displayInventory();
 
 // validate user input make sure user is supplying only positive integers 
 function validateInput(value) {
@@ -125,3 +124,13 @@ function promptUserPurchase() {
             })
         });
     }
+
+
+
+function startBamazon() {
+    displayInventory();
+}
+
+startBamazon();
+
+
