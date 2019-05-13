@@ -40,7 +40,7 @@ displayInventory();
 
 // validate user input make sure user is supplying only positive integers 
 function validateInput(value) {
-    var interger = Number.isInteger(parseFloat(value));
+    var integer = Number.isInteger(parseFloat(value));
     var sign = Math.sign(value);
 
     if(integer && (sign === 1)) {
@@ -50,3 +50,78 @@ function validateInput(value) {
     }
 }
 
+//prompt user to enter item information to make a purchase
+function promptUserPurchase() {
+    
+    // prompt user to select an item
+    inquirer.prompt([
+        {
+            type: "input", 
+            name: "item_id", 
+            message: "Please enter the Item ID for the item you would like to purchase.",
+            validate: validateInput,
+            filter: Number
+        },
+        {
+            type: "input", 
+            name: "quantity", 
+            message: "How many units of that item would you like to purchase?",
+            validate: validateInput, 
+            filter: Number
+        }
+        
+    ]).then(function(input){
+
+        console.log("You've selected: \n Item ID : " +input.item_id + "\n with a quantity of : " + input.quantity );
+
+        var item = input.item_id;
+        var quantity = input.quantity;
+
+        //Query db to confirm that the given item ID exists / available in desired quantity
+
+        var queryStr = "SELECT * FROM products WHERE ?";
+
+        connection.query(queryStr, {item_id: item}, function(err, data){
+            if (err) throw err;
+
+            // if the user selected an invalid item, the data array should be empty
+            // console.log("data = " + JSON.stringify(data));
+
+            if (data.length === 0) {
+                console.log("ERROR: Invalid Item ID entered. Please select a valid Item ID.");
+                displayInventory();
+            } else {
+                var productData = data[0];
+
+                // console.log('productData = ' + JSON.stringify(productData));
+                // console.log('productData.stock_quantity = ' + productData.stock_quantity);
+                
+                // if the quantity requested by the user is in stock
+                if (quantity <= productData.stock_quantity) {
+                    console.log("The product you selected is in stock! We will proceed with placing your order!");
+
+                    // updating the query string
+                    var updateQueryStr = 'UPDATE products SET stock_quantity = ' + (productData.stock_quantity - quantity) + ' WHERE item_id = ' + item;
+                    
+                    //updating the inventory
+                    connection.query(updateQueryStr, function(err, data) {
+						if (err) throw err;
+
+						console.log('Your order has been placed! Your total is $' + productData.price * quantity);
+						console.log('Thank you for shopping with us!');
+						console.log("\n---------------------------------------------------------------------\n");
+
+						// End the database connection
+						connection.end();
+					})
+                } else {
+                       console.log("Sorry, we don't have enough product in stock to fulfill your order.");
+                       console.log("Please modify your oder, and try again.");
+                       console.log("\n-------------------------------------------------------------------------------------\n");
+
+                       displayInventory();
+                    }
+                }
+            })
+        });
+    }
