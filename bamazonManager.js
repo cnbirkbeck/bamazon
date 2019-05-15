@@ -114,3 +114,62 @@ function validateNumeric(value) {
  
 }
 
+// addInventory will guide a user in adding inventory to an existing item
+function addInventory() {
+    // prompt the user to select an item
+    inquirer.prompt([
+        {
+            type: "input",
+            name: "item_id", 
+            message: "Please enter the Item ID for the stock you wish to update.",
+            validate: validateInteger,
+            filter: Number
+        },
+        {
+            type: "input", 
+            name: "quantity", 
+            message: "How many units would you like to add?", 
+            validate: validateInteger,
+            filter: Number
+        }
+    ]).then(function(input){
+
+        var item = input.item_id;
+        var addQuantity = input.quantity;
+
+        //query db to confirm that the given item ID exists and to determine the current stock count
+        var queryStr = "SELECT * FROM products WHERE ?";
+
+        connection.query (queryStr, {item_id: item}, function(err, data) {
+            if (err) throw err;
+
+            //if the user selected an invalid Item ID, data array will be empty
+
+            if (data.length === 0) {
+                console.log("ERROR: Invalid Item ID entered. Please select a valid Item ID.");
+                addInventory();
+            } else {
+                var productData = data[0];
+
+                console.log("Updating Inventory... ");
+
+                //updating query string
+                var updateQueryStr = 'UPDATE products SET stock_quantity = ' + (productData.stock_quantity + addQuantity) + ' WHERE item_id = ' + item;
+
+                //Update the inventory
+                connection.query(updateQueryStr, function(err, data) {
+                    if (err) throw err;
+
+                    console.log("Stock count for Item ID " + item + "has been updated to " + (productData.stock_quantity + addQuantity) + ".");
+                    console.log ("-----------------------------------------------------------------\n");
+
+                    //end db connection
+                    connection.end();
+                })
+            }
+        })
+    })
+}
+
+
+promptManagerAction();
