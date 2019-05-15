@@ -88,6 +88,38 @@ function displayInventory() {
     })
 }
 
+//displayLowInventory will display a list of products with an inventory of less than 5
+function displayLowInventory() {
+    // construct the db query string
+    queryStr = "SELECT * FROM products WHERE stock_quantity < 5";
+
+    //make the db query
+    connection.query(queryStr, function(err, data){
+        if (err) throw err;
+
+        console.log("Low Inventory Items (below 5): ");
+        console.log("------------------------------\n");
+
+
+        var strOut = "";
+        for (var i = 0; i < data.length; i++) {
+            strOut = "";
+            strOut += 'Item ID: ' + data[i].item_id + '  //  ';
+			strOut += 'Product Name: ' + data[i].product_name + '  //  ';
+			strOut += 'Department: ' + data[i].department_name + '  //  ';
+			strOut += 'Price: $' + data[i].price + '  //  ';
+			strOut += 'Quantity: ' + data[i].stock_quantity + '\n';
+
+			console.log(strOut); 
+        }
+
+        console.log("---------------------------------------------------------------------------------------------------\n");
+
+        //end db connection
+        connection.end();
+    })
+}
+
 // validateInteger ensures the user is supplying only positive integers for their inputs
 function validateInteger(value) {
     var integer = Number.isInteger(parseFloat(value));
@@ -221,5 +253,12 @@ function createNewProduct() {
     })
 }
 
+// runBamazon executes the main app logic
+function runBamazon() {
+    
+    //prompt manager for input
+    promptManagerAction();
+}
 
-promptManagerAction();
+//call to run app logic
+runBamazon();
