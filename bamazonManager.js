@@ -171,5 +171,55 @@ function addInventory() {
     })
 }
 
+// createNewProduct will guide the user in adding a new product to the inventory
+function createNewProduct() {
+    //prompt the user to enter information about the new product
+
+    inquirer.prompt([
+        {
+            type: "input", 
+            name: "product_name", 
+            message: "Please enter the new product name.",
+        },
+        {
+            type: "input", 
+            name: "department_name", 
+            message: "Which department is the new product under?",
+        },
+        {
+            type: "input", 
+            name: "price", 
+            message: "What is the price per unit?",
+            validate: validateNumeric
+        },
+        {
+            type: "input", 
+            name: "stock_quantity", 
+            message: "How many items are in stock?",
+            validate: validateInteger
+        }
+    ]).then(function(input) {
+        
+        console.log('Adding New Item: \n    product_name = ' + input.product_name + '\n' +  
+									   '    department_name = ' + input.department_name + '\n' +  
+									   '    price = ' + input.price + '\n' +  
+                                       '    stock_quantity = ' + input.stock_quantity);
+         
+        //create insertion to query string
+        var queryStr = "INSERT INTO products SET ?";
+
+        //add new product to the db
+        connection.query(queryStr, input, function (error, results, fields) {
+            if (error) throw error;
+
+            console.log('New product has been added to the inventory under Item ID ' + results.insertId + '.');
+            console.log("\n---------------------------------------------------------------------------\n");
+
+            //end the db connection
+            connection.end();
+        });
+    })
+}
+
 
 promptManagerAction();
